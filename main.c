@@ -45,6 +45,7 @@ typedef struct Centralize {
     Connexion Distortion_B;
     Connexion Distortion_C;
     Connexion Distortion_D;
+    Connexion Distortions[4]; 
 } Centralize;
 
 Centralize centralize_structure;
@@ -55,6 +56,18 @@ int displace_position(int min, int max){
     return rand_r(&seed) % (max - min + 1) + min; 
 }
 
+void init_connexion(Connexion* conn, int start_x, int start_y, int end_x, int end_y) {
+    conn->LINK.STRT_X = start_x;
+    conn->LINK.STRT_Y = start_y;
+    conn->LINK.END_X = end_x;
+    conn->LINK.END_Y = end_y;
+    
+    conn->NODE.POS_X = end_x - std_blocksize / 2;
+    conn->NODE.POS_Y = end_y - std_blocksize / 2;
+    conn->NODE.SIZE = std_blocksize;
+}
+
+
 
 // Initialize centralize_structure global
 void initCentralize(Centralize* centralize_structure, int width, int height){
@@ -62,107 +75,57 @@ void initCentralize(Centralize* centralize_structure, int width, int height){
     centralize_structure->Origin.POS_X = width/2-std_blocksize/2;
     centralize_structure->Origin.POS_Y = height/2-std_blocksize/2;
     centralize_structure->Origin.SIZE = std_blocksize;
+
+    int center_width = width/2;
+    int center_height = height/2;
+
     // North
-    centralize_structure->North.LINK.STRT_X = width/2;
-    centralize_structure->North.LINK.STRT_Y = height/2;
-    centralize_structure->North.LINK.END_X = centralize_structure->North.LINK.STRT_X;
-    centralize_structure->North.LINK.END_Y = std_blocksize;
-    // North Node
-    centralize_structure->North.NODE.POS_X = centralize_structure->North.LINK.END_X - std_blocksize / 2;
-    centralize_structure->North.NODE.POS_Y = centralize_structure->North.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->North.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->North,center_width, center_height, width/2, std_blocksize);
+
     // North East
-    centralize_structure->North_East.LINK.STRT_X = width/2;
-    centralize_structure->North_East.LINK.STRT_Y = height/2;
-    centralize_structure->North_East.LINK.END_X = width - std_blocksize;
-    centralize_structure->North_East.LINK.END_Y = std_blocksize;
-    // North East Node
-    centralize_structure->North_East.NODE.POS_X = centralize_structure->North_East.LINK.END_X - std_blocksize / 2;
-    centralize_structure->North_East.NODE.POS_Y = centralize_structure->North_East.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->North_East.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->North_East, center_width, center_height, width-std_blocksize, std_blocksize);
+ 
     // North West
-    centralize_structure->North_West.LINK.STRT_X = width/2;
-    centralize_structure->North_West.LINK.STRT_Y = height/2;
-    centralize_structure->North_West.LINK.END_X = std_blocksize;
-    centralize_structure->North_West.LINK.END_Y = std_blocksize;
-    // North West Node
-    centralize_structure->North_West.NODE.POS_X = centralize_structure->North_West.LINK.END_X - std_blocksize / 2;
-    centralize_structure->North_West.NODE.POS_Y = centralize_structure->North_West.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->North_West.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->North_West, center_width, center_height,std_blocksize, std_blocksize);
 
     // East 
-    centralize_structure->East.LINK.STRT_X = width/2;
-    centralize_structure->East.LINK.STRT_Y = height/2;
-    centralize_structure->East.LINK.END_X = width - std_blocksize;
-    centralize_structure->East.LINK.END_Y = centralize_structure->East.LINK.STRT_Y;
-    // East Node 
-    centralize_structure->East.NODE.POS_X = centralize_structure->East.LINK.END_X - std_blocksize / 2;
-    centralize_structure->East.NODE.POS_Y = centralize_structure->East.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->East.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->East, center_width, center_height, width-std_blocksize, height/2);
 
     // South
-    centralize_structure->South.LINK.STRT_X = width/2;
-    centralize_structure->South.LINK.STRT_Y = height/2;
-    centralize_structure->South.LINK.END_X = centralize_structure->South.LINK.STRT_X;
-    centralize_structure->South.LINK.END_Y = height - std_blocksize;
-    // South Node
-    centralize_structure->South.NODE.POS_X = centralize_structure->South.LINK.END_X - std_blocksize / 2;
-    centralize_structure->South.NODE.POS_Y = centralize_structure->South.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->South.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->South, center_width, center_height, width/2, height-std_blocksize);
+
     // South East
-    centralize_structure->South_East.LINK.STRT_X = width/2;
-    centralize_structure->South_East.LINK.STRT_Y = height/2;
-    centralize_structure->South_East.LINK.END_X = width - std_blocksize;
-    centralize_structure->South_East.LINK.END_Y = height - std_blocksize;
-    // South East Node
-    centralize_structure->South_East.NODE.POS_X = centralize_structure->South_East.LINK.END_X - std_blocksize / 2;
-    centralize_structure->South_East.NODE.POS_Y = centralize_structure->South_East.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->South_East.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->South_East, center_width, center_height, width-std_blocksize, height-std_blocksize);
+
     // South West
-    centralize_structure->South_West.LINK.STRT_X = width/2;
-    centralize_structure->South_West.LINK.STRT_Y = height/2;
-    centralize_structure->South_West.LINK.END_X = std_blocksize;
-    centralize_structure->South_West.LINK.END_Y = height - std_blocksize;
-    // South West Node
-    centralize_structure->South_West.NODE.POS_X = centralize_structure->South_West.LINK.END_X - std_blocksize / 2;
-    centralize_structure->South_West.NODE.POS_Y = centralize_structure->South_West.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->South_West.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->South_West, center_width, center_height, std_blocksize, height-std_blocksize);
     
     // West
-    centralize_structure->West.LINK.STRT_X = width/2;
-    centralize_structure->West.LINK.STRT_Y = height/2;
-    centralize_structure->West.LINK.END_X = std_blocksize;
-    centralize_structure->West.LINK.END_Y =  centralize_structure->West.LINK.STRT_Y;
-    // West Node
-    centralize_structure->West.NODE.POS_Y = centralize_structure->West.LINK.END_Y - std_blocksize / 2;
-    centralize_structure->West.NODE.POS_X = centralize_structure->West.LINK.END_X - std_blocksize / 2;
-    centralize_structure->West.NODE.SIZE = std_blocksize;
+    init_connexion(&centralize_structure->West, center_width, center_height, std_blocksize, height/2);
 
     // Distortions 
 
     // Distortion_A
-    centralize_structure->Distortion_A.LINK.STRT_X = width/2;
-    centralize_structure->Distortion_A.LINK.STRT_Y = height/2;
-    centralize_structure->Distortion_A.LINK.END_X = displace_position(width/2, width);
-    centralize_structure->Distortion_A.LINK.END_Y = displace_position(std_blocksize, height/2);
-
+    init_connexion(&centralize_structure->Distortion_A, width/2, height/2,displace_position(width/2, width),displace_position(std_blocksize, height/2));
+   
     // Distortion_B
-    centralize_structure->Distortion_B.LINK.STRT_X = width/2;
-    centralize_structure->Distortion_B.LINK.STRT_Y = height/2;
-    centralize_structure->Distortion_B.LINK.END_X = displace_position(width/2, width);
-    centralize_structure->Distortion_B.LINK.END_Y = displace_position(height/2, height-std_blocksize);
+    init_connexion(&centralize_structure->Distortion_B, width/2, height/2, displace_position(width/2, width),displace_position(height/2, height-std_blocksize));
 
     // Distortion_C
-    centralize_structure->Distortion_C.LINK.STRT_X = width/2;
-    centralize_structure->Distortion_C.LINK.STRT_Y = height/2;
-    centralize_structure->Distortion_C.LINK.END_X = displace_position(std_blocksize, width/2);
-    centralize_structure->Distortion_C.LINK.END_Y = displace_position(std_blocksize, height/2);
-
+    init_connexion(&centralize_structure->Distortion_C, width/2, height/2,displace_position(std_blocksize, width/2),displace_position(std_blocksize, height/2));
+    
     // Distortion_D
-    centralize_structure->Distortion_D.LINK.STRT_X = width/2;
-    centralize_structure->Distortion_D.LINK.STRT_Y = height/2;
-    centralize_structure->Distortion_D.LINK.END_X = displace_position(std_blocksize, width/2);
-    centralize_structure->Distortion_D.LINK.END_Y = displace_position(height/2, height-std_blocksize);
+    init_connexion(&centralize_structure->Distortion_D, width/2, height/2,displace_position(std_blocksize, width/2), displace_position(height/2, height-std_blocksize));
+
+    // int length = sizeof(centralize_structure->Distortions)/ sizeof(centralize_structure->Distortions[0]);
+
+    // int i;
+
+    // for (i = 0 ; i < 3; i ++){
+    //     init_connexion(&centralize_structure->Distortions[i], center_width, center_height,displace_position(std_blocksize, width), displace_position(std_blocksize, height));
+    // }
+    // init_connexion(&centralize_structure->Distortions[0], center_width, center_height,displace_position(std_blocksize, width), displace_position(std_blocksize, height));
+    // init_connexion(&centralize_structure->Distortions[1], center_width, center_height,displace_position(std_blocksize, width/2), displace_position(std_blocksize, height/2));
 
 }
 
@@ -292,6 +255,19 @@ void draw_centralized_network(Centralize* centralize_structure){
         centralize_structure->Distortion_D.LINK.END_Y, 
         std_blocksize
     );
+
+    //int length = sizeof(centralize_structure->Distortions)/ sizeof(centralize_structure->Distortions[0]);
+
+    // int i;
+
+    // for (i = 0 ; i < 3; i ++){
+    //     draw_line_with_node(centralize_structure->Distortions[i].LINK.STRT_X, centralize_structure->Distortions[i].LINK.STRT_Y, centralize_structure->Distortions[i].LINK.END_X, centralize_structure->Distortions[i].LINK.END_Y, std_blocksize);
+    // }
+
+    //draw_line_with_node(centralize_structure->Distortions[0].LINK.STRT_X, centralize_structure->Distortions[0].LINK.STRT_Y, centralize_structure->Distortions[0].LINK.END_X, centralize_structure->Distortions[0].LINK.END_Y, std_blocksize);
+
+    // draw_line_with_node(centralize_structure->Distortions[1].LINK.STRT_X, centralize_structure->Distortions[1].LINK.STRT_Y, centralize_structure->Distortions[1].LINK.END_X, centralize_structure->Distortions[1].LINK.END_Y, std_blocksize);
+
 };
 
 void draw_tryptique(int one_third,int two_third, int height){
@@ -311,8 +287,6 @@ int centralize_x_limit = window_width/3;
 int two_third = window_width/3*2;
 
 initCentralize(&centralize_structure,centralize_x_limit, window_height);
-// int rd_pos_x_left_down = displace_position(10, one_third/2);
-// int rd_pos_y_left_down = displace_position(window_height/2, window_height-10);
 
 InitWindow(window_width, window_height,"netzork");
 
@@ -343,8 +317,7 @@ while (!WindowShouldClose())
                 {
 					initCentralize(&centralize_structure, centralize_x_limit, window_height);
                 }
-            // initCentralize(&centralize_structure, centralize_x_limit, window_height);
-            //centralize_structure.Distortion_A.LINK.END_X = displace_position(0, 100);
+            //initCentralize(&centralize_structure, centralize_x_limit, window_height);
             break;
     }
 
@@ -363,7 +336,6 @@ while (!WindowShouldClose())
             } break;
             case PARADIGMS:{
                 draw_tryptique(centralize_x_limit, two_third, window_height);
-                // draw_centralized_network(one_third, window_height, rd_pos_x_left_down, rd_pos_y_left_down);
                 draw_centralized_network(&centralize_structure);
             } break;
         }
