@@ -45,16 +45,24 @@ typedef struct Centralize {
     Connexion Distortion_B;
     Connexion Distortion_C;
     Connexion Distortion_D;
-    Connexion Distortions[4]; 
+    Connexion Distortions[24]; 
 } Centralize;
 
 Centralize centralize_structure;
 
 
-int displace_position(int min, int max){
-    unsigned int seed = time(0);
+// int displace_position(int min, int max){
+//     unsigned int seed = time(0) * rand();
+//     // unsigned int seed = time(0);
+//     return rand_r(&seed) % (max - min + 1) + min; 
+// }
+
+int displace_distortion(int min, int max){
+    unsigned int seed = time(0) * rand();
+    // unsigned int seed = time(0);
     return rand_r(&seed) % (max - min + 1) + min; 
 }
+
 
 void init_connexion(Connexion* conn, int start_x, int start_y, int end_x, int end_y) {
     conn->LINK.STRT_X = start_x;
@@ -80,53 +88,50 @@ void initCentralize(Centralize* centralize_structure, int width, int height){
     int center_height = height/2;
 
     // North
-    init_connexion(&centralize_structure->North,center_width, center_height, width/2, std_blocksize);
+    init_connexion(&centralize_structure->North,center_width, center_height, width/2, displace_distortion(std_blocksize, height * 0.25));
 
     // North East
-    init_connexion(&centralize_structure->North_East, center_width, center_height, width-std_blocksize, std_blocksize);
+    init_connexion(&centralize_structure->North_East, center_width, center_height, displace_distortion(width* 0.75, width-std_blocksize), displace_distortion(std_blocksize, height* 0.25));
  
     // North West
-    init_connexion(&centralize_structure->North_West, center_width, center_height,std_blocksize, std_blocksize);
+    init_connexion(&centralize_structure->North_West, center_width, center_height,displace_distortion(std_blocksize, width* 0.25), std_blocksize);
 
     // East 
-    init_connexion(&centralize_structure->East, center_width, center_height, width-std_blocksize, height/2);
+    init_connexion(&centralize_structure->East, center_width, center_height, displace_distortion(width* 0.75, width-std_blocksize), center_height);
 
     // South
-    init_connexion(&centralize_structure->South, center_width, center_height, width/2, height-std_blocksize);
+    init_connexion(&centralize_structure->South, center_width, center_height, width/2, displace_distortion(height* 0.75, height-std_blocksize));
 
     // South East
-    init_connexion(&centralize_structure->South_East, center_width, center_height, width-std_blocksize, height-std_blocksize);
+    init_connexion(&centralize_structure->South_East, center_width, center_height, displace_distortion(width* 0.75, width-std_blocksize), displace_distortion(height* 0.75, height-std_blocksize));
 
     // South West
-    init_connexion(&centralize_structure->South_West, center_width, center_height, std_blocksize, height-std_blocksize);
+    init_connexion(&centralize_structure->South_West, center_width, center_height, displace_distortion(std_blocksize, width*0.25), displace_distortion(height* 0.75, height-std_blocksize));
     
     // West
-    init_connexion(&centralize_structure->West, center_width, center_height, std_blocksize, height/2);
+    init_connexion(&centralize_structure->West, center_width, center_height, displace_distortion(std_blocksize, width* 0.25), center_height);
 
     // Distortions 
 
     // Distortion_A
-    init_connexion(&centralize_structure->Distortion_A, width/2, height/2,displace_position(width/2, width),displace_position(std_blocksize, height/2));
+    init_connexion(&centralize_structure->Distortion_A, width/2, height/2,displace_distortion(width/2, width),displace_distortion(std_blocksize, height/2));
    
     // Distortion_B
-    init_connexion(&centralize_structure->Distortion_B, width/2, height/2, displace_position(width/2, width),displace_position(height/2, height-std_blocksize));
+    init_connexion(&centralize_structure->Distortion_B, width/2, height/2, displace_distortion(width/2, width),displace_distortion(height/2, height-std_blocksize));
 
     // Distortion_C
-    init_connexion(&centralize_structure->Distortion_C, width/2, height/2,displace_position(std_blocksize, width/2),displace_position(std_blocksize, height/2));
+    init_connexion(&centralize_structure->Distortion_C, width/2, height/2,displace_distortion(std_blocksize, width/2),displace_distortion(std_blocksize, height/2));
     
     // Distortion_D
-    init_connexion(&centralize_structure->Distortion_D, width/2, height/2,displace_position(std_blocksize, width/2), displace_position(height/2, height-std_blocksize));
+    init_connexion(&centralize_structure->Distortion_D, width/2, height/2,displace_distortion(std_blocksize, width/2), displace_distortion(height/2, height-std_blocksize));
 
-    // int length = sizeof(centralize_structure->Distortions)/ sizeof(centralize_structure->Distortions[0]);
+    int length = sizeof(centralize_structure->Distortions)/ sizeof(centralize_structure->Distortions[0]);
 
-    // int i;
+    int i;
 
-    // for (i = 0 ; i < 3; i ++){
-    //     init_connexion(&centralize_structure->Distortions[i], center_width, center_height,displace_position(std_blocksize, width), displace_position(std_blocksize, height));
-    // }
-    // init_connexion(&centralize_structure->Distortions[0], center_width, center_height,displace_position(std_blocksize, width), displace_position(std_blocksize, height));
-    // init_connexion(&centralize_structure->Distortions[1], center_width, center_height,displace_position(std_blocksize, width/2), displace_position(std_blocksize, height/2));
-
+    for (i = 0 ; i < length; i ++){
+        init_connexion(&centralize_structure->Distortions[i], center_width, center_height,displace_distortion(std_blocksize, width), displace_distortion(std_blocksize, height));
+    }
 }
 
 
@@ -256,17 +261,13 @@ void draw_centralized_network(Centralize* centralize_structure){
         std_blocksize
     );
 
-    //int length = sizeof(centralize_structure->Distortions)/ sizeof(centralize_structure->Distortions[0]);
+    int length = sizeof(centralize_structure->Distortions)/ sizeof(centralize_structure->Distortions[0]);
 
-    // int i;
+    int i;
 
-    // for (i = 0 ; i < 3; i ++){
-    //     draw_line_with_node(centralize_structure->Distortions[i].LINK.STRT_X, centralize_structure->Distortions[i].LINK.STRT_Y, centralize_structure->Distortions[i].LINK.END_X, centralize_structure->Distortions[i].LINK.END_Y, std_blocksize);
-    // }
-
-    //draw_line_with_node(centralize_structure->Distortions[0].LINK.STRT_X, centralize_structure->Distortions[0].LINK.STRT_Y, centralize_structure->Distortions[0].LINK.END_X, centralize_structure->Distortions[0].LINK.END_Y, std_blocksize);
-
-    // draw_line_with_node(centralize_structure->Distortions[1].LINK.STRT_X, centralize_structure->Distortions[1].LINK.STRT_Y, centralize_structure->Distortions[1].LINK.END_X, centralize_structure->Distortions[1].LINK.END_Y, std_blocksize);
+    for (i = 0 ; i < length; i ++){
+        draw_line_with_node(centralize_structure->Distortions[i].LINK.STRT_X, centralize_structure->Distortions[i].LINK.STRT_Y, centralize_structure->Distortions[i].LINK.END_X, centralize_structure->Distortions[i].LINK.END_Y, std_blocksize);
+    }
 
 };
 
@@ -313,11 +314,13 @@ while (!WindowShouldClose())
             }
             break;
         case PARADIGMS:
+        //SetTargetFPS(1);
         if (IsKeyPressed(KEY_R))
                 {
 					initCentralize(&centralize_structure, centralize_x_limit, window_height);
                 }
-            //initCentralize(&centralize_structure, centralize_x_limit, window_height);
+            SetTargetFPS(3);
+            initCentralize(&centralize_structure, centralize_x_limit, window_height);
             break;
     }
 
